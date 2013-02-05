@@ -1,24 +1,21 @@
-# # 756 final 
-# # functional regression of thickness of CC
-# # part one simulation
-# 
-
+#Code name PyschAPATH
+#Data simulation/generation
 #2013 Jan 29 edit - AF
-#Improve data simulation
+#Feb 4 - Added spiral
+#be sure to change date tag in files saved
 
+setwd("/Users/aaronfisher/Documents/JH/ADAMachine/2013 Files/")
 
 #MODEL
-#Y_i=β_0 + ∫X_i(t)β(t)
+#Y_i=β_0 + ∫X_i(t)β(t) +e_i
+
+shapeType<-'c'; set.seed(34871)
+#shapeType<-'snail'; set.seed(40871)
 
 # # generate "C" shape function
 #NOTE THIS IS NOT THE USUAL NOTATION FOR I????? CHANGE????
 I <- 100 #I is the length of the curve
 N <- 200 #N is the number of curves
-set.seed(999)
-y.out <- rpois(I, 3)
-#fix <- runif(I,.1,.3) #Not sure what this is doing here
-datx <- NULL
-daty <- NULL
 
 library(RColorBrewer)
 darkCol<-brewer.pal(10,'Paired')
@@ -74,7 +71,7 @@ rwalk<-function(I,amplitude=1){
   out<-outpre2*amplitude/max(abs(outpre2))
   return(out)
 }
-#plot(rwalk(I,amplitude=.2)) #test
+plot(rwalk(I,amplitude=.2)) #test
 
 #write thicknesses, generate outcomes (y)
 y<-rep(NA,N)
@@ -99,25 +96,45 @@ plot(rowMeans(thicknesses),y)
 plot(rowMeans(thicknesses[,betat>mean(betat)]),y) #rough way to check
 
 #####generate 2-d shapes######
-cShape.theta<-seq(pi/4,7*pi/4,length=I)
-R<-5 #Distance from the center of the circle
+if(shapeType=='c') {
+  shapeTheta<-seq(pi/4,7*pi/4,length=I)
+  rSpine<-rep(5,I)
+}
+if(shapeType=='snail') {
+  shapeTheta<-seq(0,2*pi,length=I)
+  rSpine<-3.5+4*(1:I/I)
+}
+
 
 
 #Get X & Y Data
-obsPerRow<-8
-dat.x<-matrix(nrow=N,ncol=I*obsPerRow)
-dat.y<-matrix(nrow=N,ncol=I*obsPerRow)
+#???????????
+jitterIt<-TRUE #Add jitter/measurement error
+#reduceIt<-TRUE
+maxObsPerRow<-20
+maxThick<-max(thicknesses) #could change this a bit later
+dat.x<-matrix(nrow=N,ncol=I*maxObsPerRow)
+dat.y<-matrix(nrow=N,ncol=I*maxObsPerRow)
 for(i in 1:N){ #going across subjects
   i.ticker<-0
   for(t in 1:I){ #going across angles
-    for(o in 1:obsPerRow){ #going across observations per angle
+    obsPerRow.it<-floor(thicknesses[i,t]/maxThick * maxObsPerRow)
+    obsR.it<-seq(rSpine[t]-thicknesses[i,t],rSpine[t]+thicknesses[i,t],length=obsPerRow.it)
+    if(jitterIt) obsR.it<-jitter(obsR.it,factor=.4)
+    for(o in 1:obsPerRow.it){ #going across observations per angle
       i.ticker<-i.ticker+1
-      obsThickness.ito<-runif(1,R-thicknesses[i,t],R+thicknesses[i,t])
-      dat.x[i,i.ticker]<-cos(cShape.theta[t])*obsThickness.ito
-      dat.y[i,i.ticker]<-sin(cShape.theta[t])*obsThickness.ito
+      #obsThickness.ito<-runif(1,rSpine[t]-thicknesses[i,t],rSpine[t]+thicknesses[i,t])
+      #no longer doing runif????
+      dat.x[i,i.ticker]<-cos(shapeTheta[t])*obsR.it[o]
+      dat.y[i,i.ticker]<-sin(shapeTheta[t])*obsR.it[o]
     }
   }
+  #if(reduceIt){
+  #  coords.i<-cbind(dat.x[i,!is.na(dat.x[i,])],dat.y[i,!is.na(dat.y[i,])])
+   # distances.i<-as.matrix(dist(coords.i))
+  #}
 }
+
 plot(dat.x[1,],dat.y[1,],pch=18,cex=.7,col=darkCol[2])
 points(dat.x[2,],dat.y[2,],pch=18,cex=.7,col=darkCol[4])
 plot(dat.x[3,],dat.y[3,],pch=18,cex=.7,col=darkCol[2])
@@ -127,10 +144,18 @@ points(dat.x[6,],dat.y[6,],pch=18,cex=.7,col=darkCol[4])
 plot(dat.x[7,],dat.y[7,],pch=18,cex=.7,col=darkCol[2])
 points(dat.x[8,],dat.y[8,],pch=18,cex=.7,col=darkCol[4])
 
+plotsubj<-function(i){
+  par(mfrow=c(1,2))
+  plot(thicknesses[i,],type='l',cex=.7,col=darkCol[2],main=paste0('Thickness i=',i))
+  plot(dat.x[i,],dat.y[i,],pch=18,cex=.7,col=darkCol[2],main=paste0('C Shape i=',i))
+}
+plotsubj(1)
+plotsubj(2)
+plotsubj(7)
 
-setwd("/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen/2013 Files/")
-save.image(file='Simulate_C_all_data_feb4.RData')
-save(file='Simulate_C_only_XY_data_feb4.RData',list=list(dat.x,dat.y))
+
+save.image(file=paste0('Simulate_',shapeType,'_all_data_feb4.RData'))
+save(file=paste0('Simulate_',shapeType,'_only_xyOutcome_data_feb4.RData'),list=c("dat.x","dat.y","y"))
 
 #END OF GENERATING DATA
 ########################################################
@@ -146,27 +171,31 @@ save(file='Simulate_C_only_XY_data_feb4.RData',list=list(dat.x,dat.y))
              ## IGNORE IF YOU WANT TO :) ###
              ###############################
 ########################################################
+workshop<-FALSE
 
-cBaseShape.x<-cos(cShape.theta)*R
-cBaseShape.y<-sin(cShape.theta)*R
+if(workshop)
+{ 
+
+cBaseShape.x<-cos(shapeTheta)*rSpine[t]
+cBaseShape.y<-sin(shapeTheta)*rSpine[t]
 plot(cBaseShape.x,cBaseShape.y)
 
 #Plot some full shapes
 #Note, this isn't how we'll generate data. We'll instead
 #generate random radiuses for each theta.
 r.i.out<- 5+thicknesses[1,]
-c.i.x<-cos(cShape.theta)*r.i.out
-c.i.y<-sin(cShape.theta)*r.i.out
+c.i.x<-cos(shapeTheta)*r.i.out
+c.i.y<-sin(shapeTheta)*r.i.out
 plot(c.i.x,c.i.y,type='l',col=darkCol[1])
 for(i in 1:60){
   for(j in 1:2){
   r.i.out<- 5+thicknesses[i,]*(j==1)-thicknesses[i,]*(j==2)
-  c.i.x<-cos(cShape.theta)*r.i.out
-  c.i.y<-sin(cShape.theta)*r.i.out
+  c.i.x<-cos(shapeTheta)*r.i.out
+  c.i.y<-sin(shapeTheta)*r.i.out
   lines(c.i.x,c.i.y,type='l',col=lightCol[i])
   }
 }
 
-
+}
 
 
