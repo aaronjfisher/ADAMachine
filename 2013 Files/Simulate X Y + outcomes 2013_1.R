@@ -4,8 +4,10 @@
 #Feb 4 - Added spiral
 #be sure to change date tag in files saved
 
-setwd("/Users/aaronfisher/Documents/JH/ADAMachine/2013 Files/")
 
+# Chen modified on 02/05/13 just to re-run the code
+# setwd("/Users/aaronfisher/Documents/JH/ADAMachine/2013 Files/")
+setwd('C:/Users/Chen/Documents/GitHub/ADAMachine/2013 Files')
 #MODEL
 #Y_i=β_0 + ∫X_i(t)β(t) +e_i
 
@@ -25,10 +27,12 @@ lightCol<-brewer.pal(10,'Set3')
 ######
 #Generate $k$ signals to mix into the simulated thickness
 
-k<-7 #number of signals to mix for X
-signals<-array(dim=c(k,I))
+k <- 7 #number of signals to mix for X
+signals <- array(dim=c(k,I))
 signals[1,]<-sin((1:I)/I*2*pi)
 signals[2,]<-seq(-1,3,length=I)
+
+# plot(signals[2,])
 
 library(splines)
 bsSig<-t(bs(1:I,df=7,degree=3,intercept=TRUE)) # "b spline signals"
