@@ -1,0 +1,3184 @@
+pie(1,col=c("red"),init.angle=0,radius=1,border=F,labels='Rafa',main='Pie Chart of statements made by professors \n  in support of pie charts \n(organized by professor)',cex=1.5)
+dev.copy2pdf(file='PieChart.pdf')
+I'm trying
+'sdfa slf'
+output
+'sdf'asdf
+'sdf'
+r<-4
+(1/2)-.5*cos(x/r)
+x<-3
+(1/2)-.5*cos(x/r)
+cos(0)
+-cos(x)/2+r/2
+initialize parameters#
+beta0<-nieveModel2$coef[1]#
+betat<-nieveModel2$coef[2]#
+betav<-nieveModel2$coef[3]#
+s_b<-sd(y)#
+b<-rep(0,ngroups)
+x<-rnorm(1000, 20)
+x<-rnorm(10000)
+for(i in 1:200){#
+	m<-mean(e^(i*x))#
+}
+for(i in 1:200){
+for(i in 1:200){#
+	m<-mean(e^(i*x))#
+}
+for(i in 1:200){#
+	m<-mean(exp(i*x))#
+}
+m
+for(i in 1:200){#
+	m[i]<-mean(exp(i*x))#
+}
+m
+for(i in -200:200){#
+	m[i]<-mean(exp(i*x))#
+}
+plot(m)
+plot(m[abs(m)<1000])
+plot(m,type='l')
+ngroups<-length(unique(group))
+sum(.5^n)
+n<- 1:1000
+sum(.5^n)
+r<-binom(1000,1,prob=.2)
+r<-rbinom(1000,1,prob=.2)
+r
+mean(r)
+r<-rbinom(10000,1,prob=.2)
+mean(r)
+r<-rbinom(10000,1,prob=.2)
+mean(r)
+mean(r^2)
+5 data#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness2.Rdata')#
+load('simul_2.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+p<-dim(thickness)[2]#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)  #
+}#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+thickZero <- scale(thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+# svdt$d^2/cumsum(svdt$d^2)#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#Just use Pre-sets#
+pcx<-princomp(x=thickZero)#
+summary(pcx)#
+names(pcx)#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-15 #How many PC's to use? Once we hit 15 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+######## END OF PICKING K_x#
+####################################
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+summary(mpca)#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA,type='l')#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+library(splines)#
+#Get splines#
+K_b<-15 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=2,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+plot(bsplines[,1],type='l',ylim=range(bsplines), main='bspline basis')#
+for(i in 1:K_b) lines(bsplines[,i])#
+t(bsplines)%*%bsplines#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx
+load(file='five_shape.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p#
+plotchains<-F#
+#
+if(plotchains){#
+# Check the chains for beta#
+#just functions for plotting here.#
+	name <- sapply(1:15, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:15){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good
+Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta #hist is for history#
+dim(beta.hist) #15 columns, rows are 10000 draws (same as burn in)#
+dim(bsplines)
+height is B(t)#
+height.hist <- beta.hist%*%t(bsplines)#
+dim(height.hist)#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))
+plot some histories#
+par(mfrow=c(1,2))#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+plot(BtEst,ylim=c(0,12))#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed')
+d<- abs(Bt.hist0/Bt.sds)#
+#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+matplot(t(d[1:500,]),type='l',main='standardized') #
+abline(h=band95dval,lwd=2)
+Cool Curve version #####
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,29),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+lines(BtEst+2*sd_t,lwd=2)#
+lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+#
+#dev.copy2pdf(file='Bands_5_Shape_12-18-12_1.pdf')
+Cool Curve version #####
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,29),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+#
+#dev.copy2pdf(file='Bands_5_Shape_12-18-12_1.pdf')
+Cool Curve version #####
+matplot(t(height.hist[1:600,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,29),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)
+Cool Curve version #####
+matplot(t(height.hist[1:700,]),lwd=.2 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,29),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)
+Cool Curve version #####
+matplot(t(height.hist[1:700,]),lwd=.2 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)
+dev.copy2pdf(file='Bands_5_Shape_12-19-12_NoBonf.pdf')
+?png
+Cool Curve version #####
+png(file='Bands_5_Shape_12-19-12_NoBonf.pdf')#
+matplot(t(height.hist[1:700,]),lwd=.2 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+png(file='Bands_5_Shape_12-19-12_NoBonf.png')#
+matplot(t(height.hist[1:700,]),lwd=.2 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)
+dev.off()
+png(file='Bands_5_Shape_12-19-12_NoBonf.png',height=600,width=600)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+png(file='Bands_5_Shape_12-19-12_NoBonf.png',height=450,width=450)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+pdf(file='Bands_5_Shape_12-19-12_NoBonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+pdf(file='Tex/pics/Bands_5_Shape_12-19-12_Bonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+pdf(file='Tex/pics/Bands_5_Shape_12-19-12_Bonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+?pdf
+pdf(file='Bands_5_Shape_12-19-12_Bonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,31),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+#lines(BtEst+2*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+dev.off()
+pdf(file='Bands_5_Shape_12-19-12_Bonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,34),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+rm(list=ls()
+)
+rm(list=ls())
+ta#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness2.Rdata')#
+load('simul_2.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+p<-dim(thickness)[2]#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)  #
+}#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+thickZero <- scale(thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+# svdt$d^2/cumsum(svdt$d^2)#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#Just use Pre-sets#
+pcx<-princomp(x=thickZero)#
+summary(pcx)#
+names(pcx)#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+######## END OF PICKING K_x#
+####################################
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+summary(mpca)#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA,type='l')#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+library(splines)#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=2,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+plot(bsplines[,1],type='l',ylim=range(bsplines), main='bspline basis')#
+for(i in 1:K_b) lines(bsplines[,i])#
+t(bsplines)%*%bsplines#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx#
+###########################################################
+###########################################################
+###########################################################
+### IN AARON'S COPY, COMMENT OUT CHEN'S CODE#
+# Using winbugs do the penalized functional regression#
+#MCMC.result <- bugs(data=list(CJ=C%*%J, y=y.out, K_b=K_b, I=I), inits=list(#
+#  list(B0=0, beta=rep(0,35), taubeta=.1)), #
+#                    parameters.to.save=c('beta', 'B0', 'taubeta'),#
+#                    model.file="bugcode.txt",n.chains=1, n.burnin=10000, n.thin=1,#
+#                    n.iter=20000, bugs.seed=999, bugs.directory="C:/Users/Chen/Documents/R/winbugs14/",#
+ #                   working.directory = path1, debug=F)#
+#save(MCMC.result, file='five_shape.RData')
+load(file='five_shape.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p
+rm(mcmc.results)
+rm(list=ls())
+ls()
+START HERE!!#
+#
+# 5 data#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness2.Rdata')#
+load('simul_2.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+p<-dim(thickness)[2]#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)  #
+}#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+thickZero <- scale(thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+# svdt$d^2/cumsum(svdt$d^2)#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#Just use Pre-sets#
+pcx<-princomp(x=thickZero)#
+summary(pcx)#
+names(pcx)#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+######## END OF PICKING K_x#
+####################################
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+summary(mpca)#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA,type='l')#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+library(splines)#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=2,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+plot(bsplines[,1],type='l',ylim=range(bsplines), main='bspline basis')#
+for(i in 1:K_b) lines(bsplines[,i])#
+t(bsplines)%*%bsplines#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx#
+###########################################################
+###########################################################
+###########################################################
+### IN AARON'S COPY, COMMENT OUT CHEN'S CODE#
+# Using winbugs do the penalized functional regression#
+#MCMC.result <- bugs(data=list(CJ=C%*%J, y=y.out, K_b=K_b, I=I), inits=list(#
+#  list(B0=0, beta=rep(0,35), taubeta=.1)), #
+#                    parameters.to.save=c('beta', 'B0', 'taubeta'),#
+#                    model.file="bugcode.txt",n.chains=1, n.burnin=10000, n.thin=1,#
+#                    n.iter=20000, bugs.seed=999, bugs.directory="C:/Users/Chen/Documents/R/winbugs14/",#
+ #                   working.directory = path1, debug=F)#
+#save(MCMC.result, file='five_shape.RData')
+dir()
+load(file='mcmc_five_35.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p#
+plotchains<-F
+load(file='mcmc_five_35.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p#
+plotchains<-T
+if(plotchains){#
+# Check the chains for beta#
+#just functions for plotting here.#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}
+Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta #hist is for history#
+dim(beta.hist) #35 columns, rows are 10000 draws (same as burn in)#
+dim(bsplines)#
+#height is B(t)#
+height.hist <- beta.hist%*%t(bsplines)#
+dim(height.hist)#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))
+plot some histories#
+par(mfrow=c(1,2))#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns
+plot some histories#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns
+BtEst<-colMeans(height.hist)#
+plot(BtEst,ylim=c(0,12))#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed')
+Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+matplot(t(d[1:500,]),type='l',main='standardized') #
+abline(h=band95dval,lwd=2)
+Cool Curve version #####
+#pdf(file='Bands_5_Shape_12-19-12_NoBonf.pdf',height=4.50,width=4.50)#
+#pdf(file='Bands_5_Shape_12-19-12_Bonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,34),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+rm(list=ls())
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness2.Rdata')#
+load('simul_2.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+p<-dim(thickness)[2]#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)  #
+}#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+thickZero <- scale(thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+# svdt$d^2/cumsum(svdt$d^2)#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#Just use Pre-sets#
+pcx<-princomp(x=thickZero)#
+summary(pcx)#
+names(pcx)#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+######## END OF PICKING K_x#
+####################################
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+summary(mpca)#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA,type='l')#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+library(splines)#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=2,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+plot(bsplines[,1],type='l',ylim=range(bsplines), main='bspline basis')#
+for(i in 1:K_b) lines(bsplines[,i])#
+t(bsplines)%*%bsplines#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx
+load(file='mcmc_five_35.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p#
+plotchains<-F#
+#
+if(plotchains){#
+# Check the chains for beta#
+#just functions for plotting here.#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good#
+# Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta #hist is for history#
+dim(beta.hist) #35 columns, rows are 10000 draws (same as burn in)#
+dim(bsplines)#
+#height is B(t)#
+height.hist <- beta.hist%*%t(bsplines)#
+dim(height.hist)#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))#
+#plot some histories#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+plot(BtEst,ylim=c(0,12))#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+#
+#Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+matplot(t(d[1:500,]),type='l',main='standardized') #
+abline(h=band95dval,lwd=2)#
+#########################
+####  Cool Curve version #####
+#pdf(file='Bands_5_Shape_12-19-12_NoBonf.pdf',height=4.50,width=4.50)#
+#pdf(file='Bands_5_Shape_12-19-12_Bonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,34),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+#dev.off()#
+#dev.copy2pdf(file='Bands_5_Shape_12-19-12_NoBonf.pdf')
+pdf(file='Bands_5_Shape_12-19-12_Bonf.pdf',height=4.50,width=4.50)#
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,34),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+#dev.off()
+matplot(t(height.hist[1:800,]),lwd=.3 ,type='l',main='Target B draws, with bands & pointwise CIs (5 Shape)',ylim=c(-8,34),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)
+image(cov2cor(sigma))
+rm(list=ls())
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness.Rdata')#
+load('simul_1.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+#
+p<-dim(thickness)[2]#
+#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)	#
+}#
+#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+#
+thickZero <- scale (thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+#
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+#
+# svdt$d^2/cumsum(svdt$d^2)#
+#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#
+#Just use Pre-sets#
+#
+pcx<-princomp(x=thickZero)#
+#
+summary(pcx)#
+names(pcx)#
+#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+#
+######## END OF PICKING K_x#
+####################################
+#
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+#
+summary(mpca)#
+#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA)#
+#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+#
+library(splines)#
+#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=3,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+#
+dev.off()#
+#
+#Plot the different Bases#
+par(mfrow=c(1,2))#
+matplot(ups[,1:10],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')#
+matplot(bsplines,type='l',ylim=range(bsplines), main='b-spline basis for β',lty=1,col='black',ylab='',xaxt='n')#
+dev.copy2pdf(file='Figure_Basis.pdf')
+par(mfrow=c(1,2))#
+matplot(ups[,1:10],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')#
+matplot(bsplines,type='l',ylim=range(bsplines), main='b-spline basis for β',lty=1,col='black',ylab='',xaxt='n')
+matplot(ups[,1:1],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')
+matplot(ups[,1:2],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')
+matplot(ups[,1:3],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')
+matplot(ups[,1:4],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')
+par(mfrow=c(1,2),mar=c(2,2,3,2))
+matplot(ups[,1:3],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')
+matplot(bsplines,type='l',ylim=range(bsplines), main='b-spline basis for β',lty=1,col='black',ylab='',xaxt='n')
+dev.copy2pdf(file='Figure_Basis.pdf')
+matplot(bsplines,type='l',ylim=range(bsplines), main=paste('b-spline basis for',expression(beta)),lty=1,col='black',ylab='',xaxt='n')
+matplot(bsplines,type='l',ylim=range(bsplines), main=expression(paste('b-spline basis for',beta),lty=1,col='black',ylab='',xaxt='n')
+matplot(bsplines,type='l',ylim=range(bsplines), main=expression(paste('b-spline basis for',beta)),lty=1,col='black',ylab='',xaxt='n')
+matplot(bsplines,type='l',ylim=range(bsplines), main=expression(paste('b-spline basis for', beta)),lty=1,col='black',ylab='',xaxt='n')
+Plot the different Bases#
+par(mfrow=c(1,2),mar=c(2,2,3,2))#
+matplot(ups[,1:3],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')#
+matplot(bsplines,type='l',ylim=range(bsplines), main=expression(paste('b-spline basis for ', beta)),lty=1,col='black',ylab='',xaxt='n')
+dev.copy2pdf(file='Figure_Basis.pdf')
+t(bsplines)%*%bsplines #
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx
+dim(t(bsplines)%*%bsplines )
+load( file='mcmc_C_35.RData')#
+H<-MCMC.result$n.keep#
+p<-101#
+#
+plotchains<-T#
+# Check the chains for beta#
+#just functions for plotting here.#
+	if(plotchains){#
+	plotInd<-floor(seq(1,H,length=min(10000,H)))#
+	p<-101 #length of the curve t=1,...p#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good
+Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta#
+dim(beta.hist)#
+dim(bsplines)#
+#
+height.hist <- beta.hist%*%t(bsplines)#
+#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points
+image(cov2cor(sigma))
+dev.copy2pdf(file='covMat_C_35.pdf')
+image(cov2cor(sigma))
+dev.copy2pdf(file='Figure_covMat_C_35.pdf')
+matplot(t(height.hist[1:500,]),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+par(mfrow=c(2,1),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma))
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))
+matplot(t(height.hist[1:500,]),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+lines(BtEst,lwd=2,col='black')
+lines(BtEst,lwd=2,col='black')
+Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta#
+dim(beta.hist)#
+dim(bsplines)#
+#
+height.hist <- beta.hist%*%t(bsplines)#
+#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))#
+#dev.copy2pdf(file='Figure_covMat_C_35.pdf')#
+#plot some histories#
+par(mfrow=c(1,2))#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+#
+#Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+par(mfrow=c(1,1))#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')
+matplot(t(height.hist[1:500,]),ylim=c(-15,35),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+dev.off()#
+####################################
+#Figures for paper#
+#Showing the draws#
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma))
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta))
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta)))
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta)))
+dev.off()#
+####################################
+#Figures for paper#
+#Showing the draws#
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta)))
+dev.off()#
+####################################
+#Figures for paper#
+#Showing the draws#
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d])))
+Showing the draws#
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws β'[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))
+dev.copy2pdf(file='Figure_covMat_C_35.pdf')
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))
+dev.copy2pdf(file='Figure_covMat_C_35.pdf')
+dev.copy2pdf(file='Figure_BtDraws_&_Cov_C_35.pdf')
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))
+par(mfrow=c(1,2),mar=c(3,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))#
+dev.copy2pdf(file='Figure_BtDraws_&_Cov_C_35.pdf')
+Figure showing hyp test procedure#
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' | β'[d],'(t) - mean(β(t)) | / σ(t)'))) #
+abline(h=band95dval,lwd=2)
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' | β'[d],'(t) - mean(β(t)) | / σ(t)'))) #
+abline(h=band95dval,lwd=2)
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(3,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' | β'[d],'(t) - mean(β(t)) | / σ(t)'))) #
+abline(h=band95dval,lwd=2)
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' | β'[d],'(t) - mean(β(t)) | / σ(t)'))) #
+abline(h=band95dval,lwd=2)
+dev.copy2pdf(file='Figure_Get_d_dist.pdf')
+warnings()
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' |'beta[d],'(t) - mean(',beta,'(t)) | / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=2)
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' |'beta[d],'(t) - mean('beta,'(t)) | / ',sigma,'(t)')))
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' |'beta[d],'(t) - mean(',beta'(t)) | / ',sigma,'(t)')))
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t)) | / ',sigma,'(t)')))
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:500,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=2)
+owing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=.5,main='Standard Devations from Mean(β(t))',xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=2)
+dev.copy2pdf(file='Figure_Get_d_dist.pdf')
+dev.copy2pdf(file='Figure_Get_d_dist.pdf')
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=.5,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=2)
+dev.copy2pdf(file='Figure_Get_d_dist.pdf')
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+lines(band95width_t,lwd=2)#
+lines(-band95width_t,lwd=2)
+matplot(t(height.hist[1:500,]),lwd=.2 ,type='l',main='Target B draws, with bands & pointwise CIs',ylim=c(-20,40),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)
+COOL PLOT!!!#
+matplot(t(height.hist[1:500,]),lwd=.2 ,type='l',main='Target B draws, with bands & pointwise CIs',ylim=c(-20,40),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=2,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)
+lines(BtEst,lwd=3,col='black')
+lines(BtEst,lwd=4,col='black')
+matplot(t(height.hist[1:500,]),lwd=.15 ,type='l',main='Target B draws, with bands & pointwise CIs',ylim=c(-20,40),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)
+COOL PLOT!!!#
+matplot(t(height.hist[1:500,]),lwd=.15 ,type='l',main='Target B draws, with bands & pointwise CIs',ylim=c(-20,40),xlab='t',ylab='B(t)',) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+matplot(t(height.hist[1:500,]),lwd=.15 ,type='l',main=expression(paste('Target ',beta[d],'(t) draws, with bands & pointwise CIs')),ylim=c(-20,40),xlab='t',ylab='B(t)',) #plots the
+matplot(t(height.hist[1:500,]),lwd=.15 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+band.dval.i<-quantile(bigd,c(.5,.6,.7,.8,.9,.95))#
+band.i.width.t<-matrix(nrow=6,ncol=p)#
+for(i in 1:6) band.i.width.t[i,]<-band.dval.i[i]*sd_t#
+row.names(band.i.width.t)<-c("50%","60%","70%","80%","90%","95%")#
+band.i.upper<-band.i.width.t #just to capture names and dimension#
+band.i.lower<-band.i.width.t #just to capture names and dimension#
+for(i in 1:6){#
+	band.i.upper[i,]<-	BtEst+band.i.width.t[i,]#
+	band.i.lower[i,]<-	BtEst-band.i.width.t[i,]#
+}#
+matlines(cbind(t(band.i.upper),t(band.i.lower)),type='l')
+COOL PLOT!!!#
+matplot(t(height.hist[1:500,]),lwd=.15 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+dev.copy2pdf(file='Figure_Bands_C_Shape_12-19-12_bonf.pdf')
+?dev.copy2png
+?dev.copy2pdf
+png('Figure_Bands_C_Shape_12-19-12_bonf.png',600,600)#
+matplot(t(height.hist[1:500,]),lwd=.15 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+dev.off()
+matplot(t(height.hist[1:500,]),lwd=.3 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+matplot(t(height.hist[1:1000,]),lwd=.3 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+matplot(t(height.hist[1:1000,]),lwd=.5 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+png('Figure_Bands_C_Shape_12-19-12_bonf.png',600,600)#
+matplot(t(height.hist[1:600,]),lwd=.5 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+png('Figure_Bands_C_Shape_12-19-12_bonf.png',600,600)#
+matplot(t(height.hist[1:600,]),lwd=.5 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+matplot(t(height.hist[1:600,]),lwd=.8 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+png('Figure_Bands_C_Shape_12-19-12_bonf.png',600,600)#
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+rm(list=ls())
+START HERE!!#
+#
+# 5 data#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness2.Rdata')#
+load('simul_2.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+p<-dim(thickness)[2]#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)  #
+}#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+thickZero <- scale(thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+# svdt$d^2/cumsum(svdt$d^2)#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#Just use Pre-sets#
+pcx<-princomp(x=thickZero)#
+summary(pcx)#
+names(pcx)#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+######## END OF PICKING K_x#
+####################################
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+summary(mpca)#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA,type='l')#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+library(splines)#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=2,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+plot(bsplines[,1],type='l',ylim=range(bsplines), main='bspline basis')#
+for(i in 1:K_b) lines(bsplines[,i])#
+t(bsplines)%*%bsplines#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx
+load(file='mcmc_five_35.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p#
+plotchains<-F#
+#
+if(plotchains){#
+# Check the chains for beta#
+#just functions for plotting here.#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good#
+# Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta #hist is for history#
+dim(beta.hist) #35 columns, rows are 10000 draws (same as burn in)#
+dim(bsplines)#
+#height is B(t)#
+height.hist <- beta.hist%*%t(bsplines)#
+dim(height.hist)#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))#
+#plot some histories#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+plot(BtEst,ylim=c(0,12))#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+#
+#Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+matplot(t(d[1:500,]),type='l',main='standardized') #
+abline(h=band95dval,lwd=2)#
+#
+dev.off()
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=.5,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))#
+dev.copy2pdf(file='Figure_BtDraws_&_Cov_C_35.pdf')
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=1,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))
+rm(list=ls())
+START HERE!!#
+#
+# C DATA#
+#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness.Rdata')#
+load('simul_1.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+#
+p<-dim(thickness)[2]#
+#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)	#
+}#
+#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+#
+thickZero <- scale (thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+#
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+#
+# svdt$d^2/cumsum(svdt$d^2)#
+#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#
+#Just use Pre-sets#
+#
+pcx<-princomp(x=thickZero)#
+#
+summary(pcx)#
+names(pcx)#
+#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+#
+######## END OF PICKING K_x#
+####################################
+#
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+#
+summary(mpca)#
+#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA)#
+#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+#
+library(splines)#
+#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=3,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+#
+dev.off()#
+#
+#Plot the different Bases#
+par(mfrow=c(1,2),mar=c(2,2,3,2))#
+matplot(ups[,1:3],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')#
+matplot(bsplines,type='l',ylim=range(bsplines), main=expression(paste('b-spline basis for ', beta)),lty=1,col='black',ylab='',xaxt='n')#
+#dev.copy2pdf(file='Figure_Basis.pdf')#
+#
+dim(t(bsplines)%*%bsplines )#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx#
+#
+###########################################################
+###########################################################
+###########################################################
+# AARON'S VERSION, COMMENT THIS OUT#
+#
+# Using winbugs do the penalized functional regression#
+# MCMC.result <- bugs(data=list(CJ=C%*%J, y=y.out, K_b=K_b, I=I), inits=list(#
+  # list(B0=0, beta=rep(0,35), taubeta=.1)), #
+                    # parameters.to.save=c('beta', 'B0', 'taubeta'),#
+                    # model.file="bugcode.txt",n.chains=1, n.burnin=10000, n.thin=1,#
+                    # n.iter=20000, bugs.seed=999, bugs.directory="C:/Users/Chen/Documents/R/winbugs14/",#
+                    # working.directory = path1, debug=F)#
+# save(MCMC.result, file='C_shape.RData')#
+###########################################################
+###########################################################
+###########################################################
+load( file='mcmc_C_35.RData')#
+H<-MCMC.result$n.keep#
+p<-101#
+#
+plotchains<-T#
+# Check the chains for beta#
+#just functions for plotting here.#
+	if(plotchains){#
+	plotInd<-floor(seq(1,H,length=min(10000,H)))#
+	p<-101 #length of the curve t=1,...p#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good#
+# Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta#
+dim(beta.hist)#
+dim(bsplines)#
+#
+height.hist <- beta.hist%*%t(bsplines)#
+#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))#
+#dev.copy2pdf(file='Figure_covMat_C_35.pdf')#
+#plot some histories#
+par(mfrow=c(1,2))#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+#
+#Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+par(mfrow=c(1,1))#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+dev.off()#
+####################################
+#Figures for paper#
+#Showing the draws
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=1,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))#
+dev.copy2pdf(file='Figure_BtDraws_&_Cov_C_35.pdf')
+dev.copy2pdf(file='Figure_BtDraws_&_Cov_C_35.pdf')
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=4,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=2,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=2,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.1,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.2,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=1.3,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=2)
+lines(BtEst,lwd=4,col='black')
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=4,col='black')
+lines(BtEst,lwd=4,col='white')
+lines(BtEst,lwd=4,col='gray')
+lines(BtEst,lwd=4,col='black')
+lines(BtEst,lwd=5,col='black')
+matplot(t(d[1:300,]),type='l',lwd=1.3,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)')))
+abline(h=band95dval,lwd=2)
+abline(h=band95dval,lwd=3)
+abline(h=band95dval,lwd=4,lty=2)
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=5,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=1.3,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=4,lty=2)
+abline(h=band95dval,lwd=3,lty=2)
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=5,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=1.3,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=3,lty=2)#
+#dev.copy2pdf(file='Figur
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=5,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=1.4,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=3,lty=2)
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.4,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=5,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=1.4,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=3,lty=2)
+Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.33,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=5,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=1.33,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=3,lty=2)
+dev.copy2pdf(file='Figure_Get_d_dist.pdf')
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=1.3,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))
+rm(list=ls())
+START HERE!!#
+#
+# 5 data#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness2.Rdata')#
+load('simul_2.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+p<-dim(thickness)[2]#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)  #
+}#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+thickZero <- scale(thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+# svdt$d^2/cumsum(svdt$d^2)#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#Just use Pre-sets#
+pcx<-princomp(x=thickZero)#
+summary(pcx)#
+names(pcx)#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+######## END OF PICKING K_x#
+####################################
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+summary(mpca)#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA,type='l')#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+library(splines)#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=2,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+plot(bsplines[,1],type='l',ylim=range(bsplines), main='bspline basis')#
+for(i in 1:K_b) lines(bsplines[,i])#
+t(bsplines)%*%bsplines#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx#
+###########################################################
+###########################################################
+###########################################################
+### IN AARON'S COPY, COMMENT OUT CHEN'S CODE#
+# Using winbugs do the penalized functional regression#
+#MCMC.result <- bugs(data=list(CJ=C%*%J, y=y.out, K_b=K_b, I=I), inits=list(#
+#  list(B0=0, beta=rep(0,35), taubeta=.1)), #
+#                    parameters.to.save=c('beta', 'B0', 'taubeta'),#
+#                    model.file="bugcode.txt",n.chains=1, n.burnin=10000, n.thin=1,#
+#                    n.iter=20000, bugs.seed=999, bugs.directory="C:/Users/Chen/Documents/R/winbugs14/",#
+ #                   working.directory = path1, debug=F)#
+#save(MCMC.result, file='five_shape.RData')#
+#
+###########################################################
+###########################################################
+###########################################################
+load(file='mcmc_five_35.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p#
+plotchains<-F#
+#
+if(plotchains){#
+# Check the chains for beta#
+#just functions for plotting here.#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good#
+# Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta #hist is for history#
+dim(beta.hist) #35 columns, rows are 10000 draws (same as burn in)#
+dim(bsplines)#
+#height is B(t)#
+height.hist <- beta.hist%*%t(bsplines)#
+dim(height.hist)#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))#
+#plot some histories#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+plot(BtEst,ylim=c(0,12))#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+#
+#Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+matplot(t(d[1:500,]),type='l',main='standardized') #
+abline(h=band95dval,lwd=2)#
+#
+dev.off()
+rm(list=ls())
+START HERE!!#
+#
+# 5 data#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness2.Rdata')#
+load('simul_2.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+p<-dim(thickness)[2]#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)  #
+}#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+thickZero <- scale(thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+# svdt$d^2/cumsum(svdt$d^2)#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#Just use Pre-sets#
+pcx<-princomp(x=thickZero)#
+summary(pcx)#
+names(pcx)#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+######## END OF PICKING K_x#
+####################################
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+summary(mpca)#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA,type='l')#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+library(splines)#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=2,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+plot(bsplines[,1],type='l',ylim=range(bsplines), main='bspline basis')#
+for(i in 1:K_b) lines(bsplines[,i])#
+t(bsplines)%*%bsplines#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx#
+###########################################################
+###########################################################
+###########################################################
+### IN AARON'S COPY, COMMENT OUT CHEN'S CODE#
+# Using winbugs do the penalized functional regression#
+#MCMC.result <- bugs(data=list(CJ=C%*%J, y=y.out, K_b=K_b, I=I), inits=list(#
+#  list(B0=0, beta=rep(0,35), taubeta=.1)), #
+#                    parameters.to.save=c('beta', 'B0', 'taubeta'),#
+#                    model.file="bugcode.txt",n.chains=1, n.burnin=10000, n.thin=1,#
+#                    n.iter=20000, bugs.seed=999, bugs.directory="C:/Users/Chen/Documents/R/winbugs14/",#
+ #                   working.directory = path1, debug=F)#
+#save(MCMC.result, file='five_shape.RData')#
+#
+###########################################################
+###########################################################
+###########################################################
+load(file='mcmc_five_35.RData')#
+H<-MCMC.result$n.keep#
+#
+plotInd<-floor(seq(1,H,length=min(10000,H)))#
+p<-101 #length of the curve t=1,...p#
+plotchains<-F#
+#
+if(plotchains){#
+# Check the chains for beta#
+#just functions for plotting here.#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good#
+# Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta #hist is for history#
+dim(beta.hist) #35 columns, rows are 10000 draws (same as burn in)#
+dim(bsplines)#
+#height is B(t)#
+height.hist <- beta.hist%*%t(bsplines)#
+dim(height.hist)#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))#
+#plot some histories#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+plot(BtEst,ylim=c(0,12))#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+#
+#Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+matplot(t(d[1:500,]),type='l',main='standardized') #
+abline(h=band95dval,lwd=2)#
+#
+dev.off()
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,45),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+#lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+#lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+d
+png('Figure_Bands_C_Shape_12-19-12_Nobonf.png',550,550)#
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,45),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+#lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+#lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+#legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+png('Figure_Bands_C_Shape_12-19-12_Nobonf.png',550,550)#
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,45),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+#lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+#lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+#legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+COOL PLOT!!!#
+png('Figure_Bands_C_Shape_12-19-12_bonf.png',550,550)#
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,45),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+#legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+png('Figure_Bands_5_Shape_12-19-12_bonf.png',550,550)#
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,45),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+#legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+png('Figure_Bands_5_Shape_12-19-12_Nobonf.png',550,550)#
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,45),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topleft',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+#legend('topleft',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()
+C DATA#
+#
+path1 <- '/Users/aaronfisher/Documents/JH/Biostatistics V & VI/Bst VI Final Project with Chen'#
+setwd(path1)#
+load('thickness.Rdata')#
+load('simul_1.RData')#
+# source('principalcurve.R')#
+# source('lmstep.R')#
+# source('pjstep.R')#
+I <- 300#
+N <- 500#
+set.seed(999)#
+y.out <- rpois(I, 3)#
+if(diff(dim(thickness))>0) thickness <- t(thickness)#
+#NOW ROWS ARE SUBJ#
+#COLS ARE COORDS#
+#
+#Look at five different subjects#
+dim(thickness)#
+plot(thickness[1,]) #
+plot(thickness[2,])#
+plot(thickness[3,])#
+plot(thickness[4,])#
+plot(thickness[5,])#
+#
+#########################################################################
+#########################################################################
+#########################################################################
+#GLMS#
+#TRY BIN METHOD FOR DIFFERENT BIN SIZES#
+#Show below the instability of the coef's at higher bin size#
+#
+p<-dim(thickness)[2]#
+#
+binmodel<-function(nbins){#
+  binMat<-matrix(nrow=dim(thickness)[1],ncol=nbins)#
+  thickbreaks<-seq.int(1,p,length=nbins+1)#
+  for(i in 1:300){#
+    for(j in 1:nbins){#
+      binMat[i,j]<- mean(thickness[i,thickbreaks[j]:thickbreaks[j+1]])#
+    }#
+  }#
+  mpois<-glm(y.out~binMat,family='poisson') #poisson Model#
+  if(nbins>1) plot(mpois$coef[-1],type='l',main=paste('β fits,  nbins = ',nbins),xlab='bin',ylab='beta') #not the intercept#
+  if(nbins<10) print(mpois$coef)#
+  #SEE HOW CLOSELY IT'S FITTING#
+  #par(mfrow=c(2,1))#
+  if(nbins>1){#
+    plot(thickness[1,],type='l',main=paste('X[1,] fits,  nbins = ',nbins))#
+    points(thickbreaks[1:nbins]+p/(2*nbins),binMat[1,],pch=19)#
+  }#
+  #plot(thickness[2,])#
+  #points(thickbreaks[1:nbins]+p/(2*nbins),binMat[2,],pch=19)#
+  return(mpois)	#
+}#
+#
+par(mfrow=c(4,2))#
+for(numberbins in c(1,5,10,20,40)) {binmodel(numberbins)}#
+#
+mBIN<-binmodel(5)#
+betaBIN<-mBIN$coef[-1]#
+dev.off()#
+plot(betaBIN)#
+#########################################################################
+#########################################################################
+#########################################################################
+#PCA#
+# plot(colMeans(thickness))#
+# #
+# colMeanMat<-matrix(colMeans(thickness),byrow=T,nrow=dim(thickness)[1],ncol=dim(thickness)[2])#
+# #
+# thickZero<-thickness-colMeanMat#
+#
+thickZero <- scale (thickness, center=T, scale=F)#
+matplot(t(matrix(rep(1:101, each=300), 300, 101)), t(thickZero), type='l')#
+# Was fitting PCA's by hand here, but gave up#
+# eigenList<-eigen(t(thickZero)%*%thickZero) #
+#
+# svd(thickZero)#
+# svdt<-svd(t(thickZero)%*%thickZero)#
+# svdt<-svd(thickZero)#
+#
+# svdt$d^2/cumsum(svdt$d^2)#
+#
+# eigenList$values#
+# eigenList$values^2/cumsum(eigenList$values^2)#
+#
+#Just use Pre-sets#
+#
+pcx<-princomp(x=thickZero)#
+#
+summary(pcx)#
+names(pcx)#
+#
+ups<-pcx$load #Matrix of eigen vectors (by column) denoted #
+image(ups)#
+image(t(ups)%*%ups)#
+t(ups[,1])%*%ups[,1] #all ψ_k'ψ_k terms will cancel to 1#
+#
+#First 5 PCs#
+plot(ups[,1])#
+plot(ups[,2])#
+plot(ups[,3])#
+plot(ups[,4])#
+plot(ups[,5])#
+####################################
+####### PICKING K_x#
+#How much did each subj weight on these 5 pcs?#
+K_x<-35 #How many PC's to use? Once we hit 35 it looks super close#
+xScoreKx<-pcx$score[,1:K_x]#
+#
+plot(1:101,ylim=range(thickZero))#
+for(l in 1:101){#
+  lines(thickZero[l,])#
+}#
+#
+plot(1:101,ylim=range(thickness))#
+for(l in 1:101){#
+  lines(thickness[l,])#
+}#
+#Est people based on PCs#
+estCurve<-array(dim=dim(thickZero))#
+for(i in 1:300){#
+  estCurvei<-rep(0,p)#
+  for(k in 1:K_x){#
+    estCurvei<-estCurvei+xScoreKx[i,k]*ups[,k]#
+  }#
+  estCurve[i,]<-estCurvei#
+}#
+#
+#Check how well the fit is on 4 random Xi's#
+par(mfrow=c(2,2))#
+for(i in sample(1:I,4)){#
+  plot(thickZero[i,],main=paste('subject ',i),pch=4)#
+  lines(estCurve[i,])#
+}#
+#
+######## END OF PICKING K_x#
+####################################
+#
+mpca<-glm(y.out~xScoreKx,family='poisson') #model PCA#
+#
+summary(mpca)#
+#
+#recover beta(t)#
+betaPCA<-rep(0,p)#
+for(kb in 1:K_x) betaPCA<-betaPCA+mpca$coef[kb+1]*ups[,kb] #don't include intercept#
+plot(betaPCA)#
+#
+#####################################################
+#####################################################
+#####################################################
+# Adding B Splines to Beta representation#
+#
+library(splines)#
+#
+#Get splines#
+K_b<-35 # # of slides#
+bsplines<-bs(1:p,df=K_b,degree=3,intercept=T) #degree 3 = cubic, could also do quadratic splines and it would look almost identical.#
+#
+dev.off()#
+#
+#Plot the different Bases#
+par(mfrow=c(1,2),mar=c(2,2,3,2))#
+matplot(ups[,1:3],type='l',main='Principle Components for X',lty=1,xaxt='n',ylab='')#
+matplot(bsplines,type='l',ylim=range(bsplines), main=expression(paste('b-spline basis for ', beta)),lty=1,col='black',ylab='',xaxt='n')#
+#dev.copy2pdf(file='Figure_Basis.pdf')#
+#
+dim(t(bsplines)%*%bsplines )#
+image(t(bsplines)%*%bsplines) #OK, not exactly orthogonal?? But still a basis!#
+#
+#Get J matrix (integrated thing)#
+J<-matrix(nrow=K_x,ncol=K_b)#
+for(kx in 1:K_x){#
+  for (kb in 1:K_b){#
+    J[kx,kb]<-sum(ups[,kx] * bsplines[,kb])/p #*1/p to integrate from 0 to 1#
+  }	#
+}#
+C<-xScoreKx#
+#
+###########################################################
+###########################################################
+###########################################################
+# AARON'S VERSION, COMMENT THIS OUT#
+#
+# Using winbugs do the penalized functional regression#
+# MCMC.result <- bugs(data=list(CJ=C%*%J, y=y.out, K_b=K_b, I=I), inits=list(#
+  # list(B0=0, beta=rep(0,35), taubeta=.1)), #
+                    # parameters.to.save=c('beta', 'B0', 'taubeta'),#
+                    # model.file="bugcode.txt",n.chains=1, n.burnin=10000, n.thin=1,#
+                    # n.iter=20000, bugs.seed=999, bugs.directory="C:/Users/Chen/Documents/R/winbugs14/",#
+                    # working.directory = path1, debug=F)#
+# save(MCMC.result, file='C_shape.RData')#
+###########################################################
+###########################################################
+###########################################################
+load( file='mcmc_C_35.RData')#
+H<-MCMC.result$n.keep#
+p<-101#
+#
+plotchains<-T#
+# Check the chains for beta#
+#just functions for plotting here.#
+	if(plotchains){#
+	plotInd<-floor(seq(1,H,length=min(10000,H)))#
+	p<-101 #length of the curve t=1,...p#
+	name <- sapply(1:35, function(x){paste('beta',as.character(x))})#
+	layout(matrix(1:4,2,2))#
+	for (i in 1:35){#
+	  plot(MCMC.result$sims.list$beta[,i][plotInd], type='l', ylab='', main=name[i])#
+	}#
+	# beta mixed very well !#
+	# Check the chains for B0 and taubeta#
+	plot(MCMC.result$sims.list$B0[plotInd], type='l', ylab='', main='B0')#
+	plot(MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(tau[beta]))#
+	plot(1/MCMC.result$sims.list$taubeta[plotInd], type='l', ylab='', main=expression(1/tau[beta]))#
+}#
+# B0 mixed well while taubeta is not quite good#
+# Reconstruct all the curves#
+beta.hist <- MCMC.result$sims.list$beta#
+dim(beta.hist)#
+dim(bsplines)#
+#
+height.hist <- beta.hist%*%t(bsplines)#
+#
+sigma <- var(height.hist)#
+sd_t<-sqrt(diag(sigma))#
+# check the correlation coefficient of all the curve grid points#
+image(cov2cor(sigma))#
+#dev.copy2pdf(file='Figure_covMat_C_35.pdf')#
+#plot some histories#
+par(mfrow=c(1,2))#
+matplot(t(height.hist[1:500,]),type='l',main='raw') #plots the columns#
+#
+BtEst<-colMeans(height.hist)#
+Bt.means<-array(rep(BtEst,each=H),dim=dim(height.hist))#
+Bt.hist0<-height.hist-Bt.means#
+matplot(t(Bt.hist0[1:500,]),type='l',main='zeroed') #
+#
+#Uncomment these to do Ciprian's Way#
+#library(MASS)#
+#Bt.hist0<-mvrnorm(50000,rep(0,101),sigma)#
+Bt.sds<-array(rep(sd_t,each=H),dim=dim(height.hist))#
+d<- abs(Bt.hist0/Bt.sds)#
+#
+par(mfrow=c(1,1))#
+bigd<-apply(d,1,max)#
+band95dval<-quantile(bigd,.95)#
+band95width_t<-band95dval*sd_t#
+plot(band95width_t)#
+#
+dev.off()#
+####################################
+#Figures for paper#
+#Showing the draws#
+par(mfrow=c(1,2),mar=c(5,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:500,]),ylim=c(-15,40),lwd=1,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=2,col='black')#
+image(cov2cor(sigma),main=expression(paste('Covariance Matrix for ',beta[d],'(t)')))#
+dev.copy2pdf(file='Figure_BtDraws_&_Cov_C_35.pdf')#
+#
+#Figure showing hyp test procedure#
+par(mfrow=c(2,1),mar=c(4,5,2,1),mgp=c(3,2,1))#
+matplot(t(height.hist[1:300,]),ylim=c(-15,40),lwd=1.33,type='l',main=expression(paste('Posterior draws ',beta[d],'(t)')),xlab='t',ylab=expression(paste('',beta[d],'(t)')))#
+lines(BtEst,lwd=5,col='black')#
+matplot(t(d[1:300,]),type='l',lwd=1.33,main=expression(paste('Standard Devations from Mean(',beta,'(t))')),xlab='t',ylab=expression(paste(' |',beta[d],'(t) - mean(',beta,'(t))| / ',sigma,'(t)'))) #
+abline(h=band95dval,lwd=3,lty=2)#
+#dev.copy2pdf(file='Figure_Get_d_dist.pdf')#
+dev.off()
+COOL PLOT!!!#
+png('Figure_Bands_C_Shape_12-19-12_Nobonf.png',600,600)#
+matplot(t(height.hist[1:600,]),lwd=.6 ,type='l',main=expression(paste('Posterior ',beta[d],'(t) Draws, with Bands & Pointwise CIs')),ylim=c(-20,40),xlab='t',ylab=expression(paste(beta[d],'(t)')),) #plots the #
+lines(BtEst,lwd=4,col='black')#
+lines(BtEst+band95width_t,lty=2,col='red',lwd=2,)#
+lines(BtEst-band95width_t,lty=2,col='red',lwd=2)#
+abline(h=0)#
+d.pt.L<- apply(height.hist,2,function(x) quantile(x,probs=.025)) #pointwise lower#
+d.pt.U<- apply(height.hist,2,function(x) quantile(x,probs=.975)) #
+d.pt.L.bon<- apply(height.hist,2,function(x) quantile(x,probs=.025/101)) #pointwise lower#
+d.pt.U.bon<- apply(height.hist,2,function(x) quantile(x,probs=1-(.025/101))) #
+#lines(BtEst+qnorm(.025/100)*sd_t,lwd=2)#
+#lines(BtEst-2*sd_t,lwd=2)#
+lines(d.pt.L,col='black',lwd=2,lty=2)#
+lines(d.pt.U,col='black',lwd=2,lty=2)#
+#lines(d.pt.L.bon,col='blue',lwd=2,lty=2)#
+#lines(d.pt.U.bon,col='blue',lwd=2,lty=2)#
+legend('topright',c('Estimate','Pointwise CI','Band'),lty=c(1,2,2),col=c('black','black','red'),lwd=2)#
+#legend('topright',c('Estimate','Pointwise CI','Band','Bonferroni'),lty=c(1,2,2,2),col=c('black','black','red','blue'),lwd=2)#
+dev.off()#
+#dev.copy2pdf(file='Figure_Bands_C_Shape_12-19-12_bo
+rm(list=ls())

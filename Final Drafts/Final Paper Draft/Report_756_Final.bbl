@@ -1,0 +1,120 @@
+\begin{thebibliography}{14}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Brezger et~al.(2005)Brezger, Kneib, and
+  Lang]{Brezger:Kneib:Lang:2005:BaysX}
+Andreas Brezger, Thomas Kneib, and Stefan Lang.
+\newblock Bayesx: Analyzing bayesian structural additive regression models.
+\newblock \emph{Journal of Statistical Software}, 14\penalty0 (11):\penalty0
+  1--22, 9 2005.
+
+\bibitem[Crainiceanu and Goldsmith(2010)]{crainiceanu2010bayesian}
+C~Crainiceanu and J~Goldsmith.
+\newblock Bayesian functional data analysis using winbugs.
+\newblock \emph{J Stat Softw}, 32\penalty0 (11), 2010.
+
+\bibitem[Crainiceanu et~al.(2012)Crainiceanu, Staicu, Ray, and
+  Punjabi]{crainiceanu2012bootstrap}
+C.M. Crainiceanu, A.M. Staicu, S.~Ray, and N.~Punjabi.
+\newblock Bootstrap-based inference on the difference in the means of two
+  correlated functional processes.
+\newblock \emph{Statistics in Medicine}, 2012.
+
+\bibitem[Duchon(1977)]{duchon1977splines}
+J.~Duchon.
+\newblock Splines minimizing rotation-invariant semi-norms in soboley spaces.
+\newblock \emph{Lecture notes in mathematics}, 571/1977:\penalty0 85--100,
+  1977.
+
+\bibitem[Goldsmith et~al.(2010)Goldsmith, Feder, Crainiceanu, Caffo, and
+  Reich]{goldsmith2010penalized}
+J.~Goldsmith, J.~Feder, C.M. Crainiceanu, B.~Caffo, and D.~Reich.
+\newblock Penalized functional regression.
+\newblock \emph{Johns Hopkins University, Dept. of Biostatistics Working
+  Papers}, page 204, 2010.
+
+\bibitem[Goldsmith et~al.(2011)Goldsmith, Wand, and
+  Crainiceanu]{goldsmith2011functional}
+J.~Goldsmith, M.P. Wand, and C.~Crainiceanu.
+\newblock Functional regression via variational bayes.
+\newblock \emph{Electronic Journal of Statistics}, 5:\penalty0 572--602, 2011.
+
+\bibitem[Hastie(1984)]{hastie1984principal}
+T.~Hastie.
+\newblock Principal curves and surfaces.
+\newblock \emph{Technical report}, 11, 1984.
+
+\bibitem[Hastie and Stuetzle(1989)]{hastie1989principal}
+T.~Hastie and W.~Stuetzle.
+\newblock Principal curves.
+\newblock \emph{Journal of the American Statistical Association}, 84\penalty0
+  (406):\penalty0 502--516, 1989.
+
+\bibitem[Lang and Brezger(2004)]{lang2004bayesian}
+S.~Lang and A.~Brezger.
+\newblock Bayesian p-splines.
+\newblock \emph{Journal of computational and graphical statistics}, 13\penalty0
+  (1):\penalty0 183--212, 2004.
+
+\bibitem[Luders et~al.(2006)Luders, Narr, Zaidel, Thompson, Jancke, and
+  Toga]{luders2006parasagittal}
+E.~Luders, KL~Narr, E.~Zaidel, PM~Thompson, L.~Jancke, and AW~Toga.
+\newblock Parasagittal asymmetries of the corpus callosum.
+\newblock \emph{Cerebral Cortex}, 16\penalty0 (3):\penalty0 346--354, 2006.
+
+\bibitem[Luders et~al.(2009)Luders, Narr, Hamilton, Phillips, Thompson, Valle,
+  Del'Homme, Strickland, McCracken, Toga, and Levitt]{Luders2009decreased}
+Eileen Luders, Katherine~L. Narr, Liberty~S. Hamilton, Owen~R. Phillips,
+  Paul~M. Thompson, Jessica~S. Valle, Melissa Del'Homme, Tony Strickland,
+  James~T. McCracken, Arthur~W. Toga, and Jennifer~G. Levitt.
+\newblock Decreased callosal thickness in attention-deficit/hyperactivity
+  disorder.
+\newblock \emph{Biological Psychiatry}, 65\penalty0 (1):\penalty0 84 -- 88,
+  2009.
+
+\bibitem[Reich et~al.(2010)Reich, Ozturk, Calabresi, and
+  Mori]{reich2010automated}
+D.~Reich, A.~Ozturk, P.~Calabresi, and S.~Mori.
+\newblock Automated vs. conventional tractography in multiple sclerosis:
+  Variability and correlation with disability.
+\newblock \emph{NeuroImage}, 49:\penalty0 3047--3056, 2010.
+
+\bibitem[Vidal et~al.(2006)Vidal, Nicolson, DeVito, Hayashi, Geaga, Drost,
+  Williamson, Rajakumar, Sui, Dutton, et~al.]{vidal2006mapping}
+C.N. Vidal, R.~Nicolson, T.J. DeVito, K.M. Hayashi, J.A. Geaga, D.J. Drost,
+  P.C. Williamson, N.~Rajakumar, Y.~Sui, R.A. Dutton, et~al.
+\newblock Mapping corpus callosum deficits in autism: an index of aberrant
+  cortical connectivity.
+\newblock \emph{Biological Psychiatry}, 60\penalty0 (3):\penalty0 218--225,
+  2006.
+
+\bibitem[Wood(2003)]{wood2003thin}
+S.~Wood.
+\newblock Thin plate regression splines.
+\newblock \emph{Journal of the royal statistical society}, 65\penalty0
+  (1):\penalty0 95--114, 2003.
+
+\end{thebibliography}
+cal connectivity.
+\newblock \emph{Biological Psychiatry}, 60\penalty0 (3):\penalty0 218--225,
+  2006.
+
+\bibitem[Wood(2003)]{wood2003thin}
+S.~Wood.
+\newblock Thin plate regression splines.
+\newblock \emph{Journal of the royal statistical society}, 65\penalty0
+  (1):\penalty0 95--114, 2003.
+
+\bibitem[Zipunnikov et~al.(2011)Zipunnikov, Greven, Caffo, Reich, and
+  Crainiceanu]{zipunnikov2011functional}
+Vadim Zipunnikov, Sonja Greven, Brian Caffo, Daniel~S. Reich, and Ciprian
+  Crainiceanu.
+\newblock Longitudinal high-dimensional data analysis.
+\newblock \emph{Johns Hopkins University, Dept. of Biostatistics Working
+  Papers}, 234, 2011.
+
+\end{thebibliography}

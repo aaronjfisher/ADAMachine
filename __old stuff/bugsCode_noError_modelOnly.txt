@@ -1,0 +1,19 @@
+model{
+	for (i in 1:N)
+          {
+        	 y[i]~dpois(lambda[i])
+             log(lambda[i])<-B0+theta[i]
+             
+             #We essentially have to break up the matrix algrebra.
+		    theta[i]<-CJ[i,1]*beta[1]+CJ[i,2]*beta[2]+CJ[i,3]*beta[3]+
+            	CJ[i,4]*beta[4]+CJ[i,5]*beta[5]+CJ[i,6]*beta[6]+CJ[i,7]*beta[7]+
+            	CJ[i,8]*beta[8]+CJ[i,9]*beta[9]+CJ[i,10]*beta[10]
+        }
+		
+		#in winbugs the 2nd param default for dnorm is inversed, b/c we always use inverse gamma priors
+		 for (k in 2:K_b)
+           {beta[k]~dnorm(beta[k-1],taubeta)}
+		  beta[1]~dnorm(0,1.0E-6)
+            B0~dnorm(0,1.0E-3) 
+            taubeta~dgamma(1.0E-3,1.0E-3)
+} ### END MODEL

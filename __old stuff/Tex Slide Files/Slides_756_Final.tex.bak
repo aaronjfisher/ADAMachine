@@ -1,0 +1,255 @@
+\documentclass[9 pt]{beamer}
+
+
+%%%%FONT
+\usepackage[scaled]{helvet}
+%\usepackage{times}
+
+
+%%%%BACKGROUND SHADING
+\setbeamertemplate{background canvas}[vertical shading][bottom=white,top=black!30]
+
+
+
+%%%%THEMES
+\usetheme{Warsaw}
+\usecolortheme{seagull}
+%\usetheme{Madrid}
+%\usetheme{Pittsburgh}
+%\usetheme{Montpellier}
+%\usetheme{default}
+
+
+%%%NAVIGATION, lose navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+%%%%HEADERS
+%\setbeamertemplate{headline}{\vspace{1cm}}
+%\setbeamertemplate{headline}{}
+
+
+%%%%FOOTERS
+%\setbeamertemplate{footline}{}
+%\setbeamertemplate{footline}[page number]{}
+%\setbeamertemplate{footline}[]{}
+
+
+
+
+%%%BULLETS
+
+%these together
+\setbeamercolor{itemize item}{fg=black}
+%\setbeamercolor{itemize subitem}{fg=black}
+%\setbeamercolor{description item}{fg=black}
+%
+\setbeamertemplate{itemize item}{\tiny\raise1.5pt\hbox{\textbullet}}
+%\setbeamertemplate{itemize subitem}{\tiny\raise1.5pt\hbox{\textbullet}}
+
+
+%these one
+\setbeamertemplate{itemize subitem}{BIOSTAT}
+%\setbeamertemplate{itemize subitem}{$\cdot$}
+
+%\setbeamertemplate{itemize item}{\huge $\cdot$}
+
+
+
+
+%%%%%SIZE
+%\setbeamersize{text margin left=2cm}
+%\setbeamersize{text margin top=0cm}
+
+
+
+
+
+
+
+%%%%HYPERLINKS
+\hypersetup{
+    colorlinks,%
+    citecolor=blue,%
+    filecolor=green,%
+    linkcolor=black,%
+    urlcolor=red
+}
+
+
+%%%PACKAGES
+\usepackage{color}
+\usepackage{graphicx,amsfonts,cite,bm}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{marvosym}
+
+
+
+%%%%CHANGE MATH FONT
+\usefonttheme[onlymath]{serif}
+
+
+
+%%%%WHAT DO THESE DO???
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+
+
+
+%%%%%% TIKZ
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\usetikzlibrary{decorations.pathmorphing} % noisy shapes
+\usetikzlibrary{positioning}
+\usetikzlibrary{fit}					% fitting shapes to coordinates
+\usetikzlibrary{backgrounds}	% drawing the background after the foreground
+\usetikzlibrary{shapes,snakes,calendar,matrix,backgrounds,folding}
+
+
+%%%%NEW COMMANDS
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\beqn}{\begin{eqnarray}}
+\newcommand{\eeqn}{\end{eqnarray}}
+\newcommand{\be}{\begin{enumerate}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\def\xii{\mathbf{x}^{(i)}}
+\def\tii{\mathbf{t}^{(i)}}
+
+\linespread{1.1}
+
+\title[Thickness Analysis]{Simulation Study of Automated Thickness Analyzing Machine (ATAM)}
+\author[YUE \& FISHER]{Chen Yue \& Aaron Fisher}
+\institute[JHU Biostatictics]{Johns Hopkins Bloomberg School of Public Health\\Department of Biostatistics}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Background and Motivation}
+[May add more]
+Several diseases have been found to be related to white matter loss in brain, such as Autism (Vidal 2006) and ADHD (Luders 2009) etc.\
+
+The white matter loss is measured using the loss of thickness of mid-sagittal slice of CC, which is the largest white matter structure in brain.\
+
+Our objective: Construct a pipeline of detecting the location of the thickness loss in CC. (Whether exists and where?)
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht]
+\caption{CC 3D rendering and mid-sagittal slice}
+\centering
+\begin{minipage}[b]{.45\linewidth}
+\centering
+\scalebox{0.3}{\includegraphics{pics/corpusA5.jpg}}
+\end{minipage}
+\begin{minipage}[b]{.45\linewidth}
+\hspace{-0.2cm}
+\centering
+\scalebox{0.35}[0.26]{\includegraphics{pics/corpusA3.png}}
+\end{minipage}
+\end{figure}
+176 patients with MS(Multiple Sclerosis), 466 scans.\
+
+Color indicates corresponding FA.
+\end{frame}
+
+\begin{frame}
+\frametitle{Pipeline}
+\begin{enumerate}
+\item Obtain the center curve (principal curve) of the target data cloud.
+\item Measure the thickness.
+\item Regress the thickness function on a scalar outcome.
+\item Hypothesis testing.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simulation Settings}
+Case 1: I=300, response $Y_i\sim \text{Possion}(\lambda=3)$. Thickness of image$_i$ within $(\frac{\pi}{3},\frac{3\pi}{4})$ and $(\frac{5\pi}{4},\frac{7\pi}{4})$ is related to $Y_i$.
+\begin{figure}[!th]
+\centering
+\scalebox{0.2}{\includegraphics{pics/Simulation_C.png}}
+\end{figure}\
+
+Case 2: I=300, response $Y_i\sim \text{Possion}(\lambda=3)$. Thickness of image$_i$ in the vertical bar is related to $Y_i$.
+\begin{figure}[!th]
+\centering
+\scalebox{0.2}{\includegraphics{pics/Simulation_5.png}}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Principal curve}
+\begin{figure}[!th]
+\centering
+\begin{minipage}[b]{.45\linewidth}
+\centering
+\scalebox{0.3}{\includegraphics{pics/plot3.png}}
+\end{minipage}
+\begin{minipage}[b]{.45\linewidth}
+\hspace{-.4cm}
+\centering
+\scalebox{0.25}[0.32]{\includegraphics{pics/plot4.png}}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+{\bf Principal Curve Algorithm}
+\begin{enumerate}
+\item{\bf The Projection Step.} The points are projected onto the curve of the previous iteration.
+\item{\bf The Conditional Expectation Step.} For each data point $\xii$, we calculate a locally average $\bar{\xii}$.
+\item{\bf The Smoothing Step.} Fitting a fast TPS using all the local average data point $\bar{\xii}$, obtain $f^{new}$.
+\end{enumerate}
+\begin{figure}[ht]
+\begin{minipage}[b]{0.45\linewidth}
+\centering
+\scalebox{0.4}{\includegraphics{pics/alg_1.jpg}}
+\end{minipage}
+\begin{minipage}[b]{0.45\linewidth}
+\centering
+\scalebox{0.4}{\includegraphics{pics/alg_2.jpg}}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Principal curve fitting result}
+\begin{figure}[ht]
+\centering
+\scalebox{0.27}{\includegraphics{pics/Pcurve_C.png}}
+\scalebox{0.27}{\includegraphics{pics/Pcurve_5.png}}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Obtaining Thickness along the principal curve}
+\begin{itemize}
+\item $\text{Thick}^*(t)=\text{Quantile}\big(\{2\times \text{dist}_{t_{j}},\big||t_{j}-t|\le.02\}\ 0.95\big)$
+\item Fit a smooth spline of all $\text{Spline}(\text{Thick}^*(.)\longrightarrow\ \text{Thick}(.)$.
+\end{itemize}
+\begin{figure}[ht]
+\begin{minipage}[b]{0.45\linewidth}
+\centering
+\scalebox{0.27}{\includegraphics{pics/thickness.png}}
+\end{minipage}
+\begin{minipage}[b]{0.45\linewidth}
+\centering
+\scalebox{0.27}{\includegraphics{pics/thickness2.png}}
+\end{minipage}
+\end{figure}
+\end{frame}
+\end{document} 

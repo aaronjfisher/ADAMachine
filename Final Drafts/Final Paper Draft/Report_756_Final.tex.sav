@@ -1,0 +1,112 @@
+\documentclass{article}
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage[numbers]{natbib}
+\usepackage{CJK}
+\usepackage[dvips]{graphics}
+\usepackage[sumlimits]{amsmath}
+\usepackage{pifont}
+\usepackage{bbding}
+\usepackage{color}
+\usepackage{calrsfs}
+\usepackage{bbm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{url,graphicx,tabularx,array,geometry}
+\setlength{\parskip}{1ex} %--skip lines between paragraphs
+\setlength{\parindent}{0pt} %--don't indent paragraphs
+\setlength{\topmargin}{-20pt}
+\setlength{\textheight}{635pt}
+\setlength{\textwidth}{430pt}
+\setlength{\hoffset}{-20pt}
+\setlength{\voffset}{-30pt}
+\setlength{\headsep}{10pt}
+\makeatletter
+\newcommand{\rmnum}[1]{\romannumeral #1}
+\def\bone{\mathbf{1}}
+\def\bY{\mathbf{Y}}
+\def\bI{\mathbf{I}}
+\def\bU{\mathbf{U}}
+\def\bV{\mathbf{V}}
+\def\bD{\mathbf{D}}
+\def\bE{\mathbf{E}}
+\def\bH{\mathbf{H}}
+\def\bX{\mathbf{X}}
+\def\bR{\mathbf{R}}
+\def\bt{\mathbf{t}}
+\def\bz{\mathbf{z}}
+\def\bx{\mathbf{x}}
+\def\logit{\mathrm{logit}}
+\def\xii{\mathbf{x}^{(i)}}
+\def\tii{\mathbf{t}^{(i)}}
+\newcommand{\Rmnum}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+
+%-- Commands for header
+%\renewcommand{\title}[1]{\textbf{#1}\\}
+%\renewcommand{\line}{\begin{tabularx}{\textwidth}{X>{\raggedleft}X}\hline\\\end{tabularx}\\[-0.5cm]}
+%\newcommand{\leftright}[2]{\begin{tabularx}{\textwidth}{X>{\raggedleft}X}#1%
+%& #2\\\end{tabularx}\\[-0.5cm]}
+
+%\linespread{2} %-- Uncomment for Double Space
+\begin{document}
+
+\title{140.756 Final Project\\Simulation Study of Automated Thickness Analyzing Machine (ATAM)}
+\author{Chen YUE \& Aaron FISHER} %-- left and right positions in the header
+\date{\today}
+\maketitle
+\begin{abstract}
+blah blah
+\end{abstract}
+
+\section{Introduction}
+blah blah
+\section{Principal Curves}
+In this whole pipeline, the first step would be calculating the center curves of the data cloud. The method we were using was called the principal curves \cite{hastie1989principal}.
+\subsection{Principal Surfaces}
+Let $\mathbf{x}_i=(x_{i1},x_{i2})^T,\ i=1,\dots, I$ be the data points in two dimensional space, $\mathcal{R}^2$, $t_i$ be corresponding parametrization points in real line, $\mathcal{R}$. In addition, we will require (without loss of generality) that the coordinate $t_i$ ranging from 0 to 1. We define $f$ as the smooth principal curve function $f: t_i\mapsto f(t_i)$ that maps from $\mathcal{R}$ to $\mathcal{R}^2$. The principal curve function satisfies the {\em self-consistency} condition:
+\begin{equation}
+E(\bX|\lambda_f(\bX)=\bt)=f(\bt)\ \ \text{for all }\bt,
+\end{equation}
+where $\lambda_f(\bx)=\sup_{\mathbf{t}}\big\{\mathbf{t}: \|\mathbf{x}-f(\mathbf{t})\|=\inf_{\mathbf{\mu}}\|\mathbf{x}-f(\mathbf{\mu})\| \big\}$ is the projection function with respect to $f$. The projection function maps a data point on to the closest principal curve point having the largest parametrization. 
+\citeauthor{hastie1989principal} \cite{hastie1989principal} showed that principal curves generally exist, though are not unique. We have found that there are two main distinctions between different fitted principal curves: the degree of smoothness and the method of parametrization. In most algorithms, these properties will be controlled by the specific smoother being used in the algorithm and its tuning parameters. The details of our specific algorithm will be demonstrated in the next section.\
+
+\subsection{Algorithm}
+In this paper, the algorithm used in \cite{hastie1989principal} will be modified. This algorithm allows us to find the curves coordinate for each data point ($\mathbf{t}_i, i=1,\dots, I$), which we will use later to create parametric summaries. However, the original principal surface algorithm can only yield surfaces which are locally flattened. Therefore, instead of local planar smoothers, we employ thin-plate spline (TPS) for fitting the surface. Thin-plate splines were proposed by \cite{duchon1977splines} and are now widely used for bivariate smoothing. The TPS penalize the least squares error by a high-order derivative term in order to achieve a desired degree of smoothness. \citeauthor{wood2003thin} \cite{wood2003thin} improved the computational efficiency when fitting TPS by using an optimal approximating basis that we employ.\
+
+{\bf Preprocessing.} Recall the notation we defined in section 2.2, let $\mathbf{X}=[\mathbf{x}_1, \dots, \mathbf{x}_I]^T$ be the $I\times 3$ matrix that contains the 3D coordinates of the dataset. We assumed that the data are demeaned and centered around the origin. Principal component decomposition is then applied. Let $\mathbf{X}=\mathbf{U}\mathbf{\Sigma}\mathbf{V}^T$ be the singular value decomposition of $\mathbf{X}$. Then $\mathbf{U}\tilde{\mathbf{\Sigma}}$ are the first two principal ``scores" of the data matrix, where $\tilde{\mathbf{\Sigma}}$ is a submatrix of $\mathbf{\Sigma}$ containing the first two columns. We then standardized the scores so that both scores are in $[0,\ 1].$ and used them as the initial 2D parametrization.\
+
+{\bf Conditional Expectation.} Suppose $\mathbf{t}_i=(t_{i1},t_{i2})^T$ be the current parametrization of $\mathbf{x}_i$ in two dimensional space, $[0,1]\times[0,1]$. For a specific data point $\bx_0$, with its coordinate $\bt_0$, we choose $r$ as a radius, such that all the other data points with their projection coordinate having less distance from $\bt$ than $r$ are considered as the neighbor of $\bx$, see the left panel in Figure \ref{fig.alg}. Let $\mathcal{N}_{\bx_0}$ be the set of all the neighbors of the point $\bx_0$. Then we have $\mathcal{N}_{\bx_0}=\big\{\bx_j :\ \|\bt_{j}-\bt_0\|\le r \big\}$ and we calculate the local weighted average as follows:
+\begin{equation*}
+\bx^{lm}=\sum_{i}w^{\bx}_i \bx_i\ \ \text{where}\ \ w_i^{\bx}:=\mathbf{1}_{[\mathbf{x}_i\in \mathcal{N}_{\mathbf{x}_0}]}\times\frac{\exp\big\{-\frac{\|\bt_i-\bt\|_2^2}{h}\big\}} {\sum_{j:\ \bx_j\in \mathcal{N}_{\bx_0}}\exp\big\{-\frac{\|\bt_j-\bt\|_2^2}{h}\big\}}.
+\end{equation*}
+
+{\bf Smoothing.} Bivariate thin plate splines \cite{wood2003thin} are applied after we obtained these local averages: $\bx_i^{lm},\ i=1,\dots,I$. In this step, we fitted
+\begin{equation}
+x^{lm}_{id}=f_{d1}(t_{i1})+f_{d2}(t_{i2})+f_{d3}(t_{i1},t_{i2})+\epsilon_{id},\ \ d=1,2,3,
+\end{equation}
+and obtained a bivariate thin plate spline smoothing of the local average points, which is demonstrated in the right panel of Figure \ref{fig.alg}. Here
+\begin{equation}
+f(\bt_i)=\left[\begin{array}{l}\hat{f}_{11}(t_{i1})+\hat{f}_{12}(t_{i2})+\hat{f}_{13}(t_{i1},t_{i2})\\
+\hat{f}_{21}(t_{i1})+\hat{f}_{22}(t_{i2})+\hat{f}_{23}(t_{i1},t_{i2})\\ \hat{f}_{31}(t_{i1})+\hat{f}_{32}(t_{i2})+\hat{f}_{33}(t_{i1},t_{i2})\end{array}\right]
+\end{equation}
+is the current principal surface function mapping from the 2D parametrization space to 3D coordinate space.\
+
+{\bf Projection.} We then projected each data point onto the current principal surface and obtain new 2D parametrization. Notice that we used grid search method to find the projection and we only search within the range $[0,1]\times[0,1]$. Therefore there will be some data points being projected onto the boundary which brings some issues when we further analyzed the 2D parametrization. After this step, we iterate the whole procedure with the new 2D parametrization.\
+
+\section{Functional Regression}
+lalala
+\section{Hypothesis Testing}
+blah blah
+\section{Conclusion}
+hiahia
+
+\newpage
+
+\bibliographystyle{plainnat}
+\nocite{*}
+\bibliography{thickcite}
+
+\end{document}
