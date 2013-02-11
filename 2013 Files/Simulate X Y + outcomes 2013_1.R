@@ -134,6 +134,8 @@ for(i in 1:N){ #going across subjects
    # distances.i<-as.matrix(dist(coords.i))
   #}
 }
+all(is.na(dat.y)==is.na(dat.x))
+
 
 plot(dat.x[1,],dat.y[1,],pch=18,cex=.7,col=darkCol[2])
 points(dat.x[2,],dat.y[2,],pch=18,cex=.7,col=darkCol[4])
@@ -154,8 +156,8 @@ plotsubj(2)
 plotsubj(7)
 
 
-save.image(file=paste0('Simulate_',shapeType,'_all_data_feb4.RData'))
-save(file=paste0('Simulate_',shapeType,'_only_xyOutcome_data_feb4.RData'),list=c("dat.x","dat.y","y"))
+#save.image(file=paste0('Simulate_',shapeType,'_all_data_feb4.RData'))
+#save(file=paste0('Simulate_',shapeType,'_only_xyOutcome_data_feb4.RData'),list=c("dat.x","dat.y","y"))
 
 #END OF GENERATING DATA
 ########################################################
