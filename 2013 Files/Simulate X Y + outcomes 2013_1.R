@@ -13,8 +13,8 @@ setwd("/Users/aaronfisher/Documents/JH/ADAMachine/2013 Files/")
 #MODEL
 #Y_i=β_0 + ∫X_i(t)β(t) +e_i
 
-#shapeType<-'c'; set.seed(34871)
-shapeType<-'snail'; set.seed(40871)
+shapeType<-'c'; set.seed(34871)
+#shapeType<-'snail'; set.seed(40871)
 
 library(RColorBrewer)
 darkCol<-brewer.pal(10,'Paired')
@@ -23,7 +23,7 @@ lightCol<-brewer.pal(10,'Set3')
 #NOTE THIS IS NOT THE USUAL NOTATION FOR I????? CHANGE????
 N <- 200 #N is the number of curves
 I <- 500 #I is the length of the curve (final true resolution will be determined by resSquare)
-resSquare<-100 #20 takes<5sec; 60 takes 13sec; 100 takes 36sec (for snail)
+resSquare<-70 #20 takes<5sec; 60 takes 13sec; 100 takes 36sec (for snail)
 #This is the grid resolution of both axes in the final plots
 
 
