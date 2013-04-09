@@ -114,7 +114,7 @@ for (i in 1:I){
 
 setwd('C:/Users/Chen/Documents/GitHub/Research/ADAMachine/2013 Files/temp_output')
 save(thick.dat, file='thickness_est_dat.RData')
-
+load('thickness_est_dat.RData')
 
 ## Now thickness analysis
 
@@ -134,6 +134,8 @@ length(ados)
 ados.id <- which(!is.na(ados))
 thick.ados <- thick.dat[,ados.id]
 dim(thick.ados)
+gender <- dat.tab$Gender
+dx <- dat.tab$Primary.Dx
 # match the name
 dat.tab$MRI.[ados.id]
 files[ados.id]
@@ -168,3 +170,39 @@ matplot(cbind(PFR.fit$BetaHat[[1]][101:1], PFR.fit$Bounds[[1]][101:1,]),
 lines(1:101,rep(0,101), col='blue', lty='dashed')
 
 # not good either....
+
+# added on 02/27/13
+# pointwise analysis and bin analysis
+# first we do pointwise
+
+
+p.value.ados <- apply(thick.ados, 1, function(x){ summary(lm(ados[ados.id]~x))$coefficients[2,4] })
+plot(p.value.ados, type='p', pch=19, cex=.5)
+p.value.paness <- apply(thick.paness, 1, function(x){ summary(lm(paness[paness.id]~x+dx[paness.id]))$coefficients[2,4] })
+plot(p.value.paness, type='p', pch=19, cex=.5)
+
+# calculate the average thickness
+ave.thick.ados <- colMeans(thick.ados)
+plot(ave.thick.ados, ados[ados.id])
+summary(lm(ados[ados.id]~ave.thick.ados))
+ave.thick.paness <- colMeans(thick.paness)
+plot(ave.thick.paness, paness[paness.id])
+summary(lm(paness[paness.id]~ave.thick.paness+dx[paness.id]))
+
+# try bin analysis
+Bin <- 5
+group.fac <- floor(seq(1,Bin+.9999,length.out=101))
+# unlist(by(thick.ados[,1], group.fac, mean))
+# ados
+thick.group <- apply(thick.ados, 2, function(x){by(data=data.frame(x=x, levl=as.factor(group.fac)), INDICES=group.fac, function(a){mean(a[,1])})})
+p.value.ados.bin <- apply(thick.group, 1, function(x){ summary(lm(ados[ados.id]~x))$coefficients[2,4] })
+plot(p.value.ados.bin, type='b', pch=19, cex=.5)
+
+# try bin analysis for paness
+Bin <- 50
+group.fac <- floor(seq(1,Bin+.9999,length.out=101))
+# unlist(by(thick.ados[,1], group.fac, mean))
+# ados
+thick.group <- apply(thick.paness, 2, function(x){by(data=data.frame(x=x, levl=as.factor(group.fac)), INDICES=group.fac, function(a){mean(a[,1])})})
+p.value.ados.bin <- apply(thick.group, 1, function(x){ summary(lm(paness[paness.id]~x))$coefficients[2,4] })
+plot(p.value.ados.bin, type='b', pch=19, cex=.5)
