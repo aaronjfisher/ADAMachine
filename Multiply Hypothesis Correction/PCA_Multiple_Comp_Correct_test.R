@@ -1,15 +1,22 @@
 #COVERAGE MEANS: What % of the time is the true beta fully contained in our joint ci
 
-########################################################
-##############        LIBRARIES            #############
-########################################################
+
+##############################################################################
+##############################################################################
+#########################        LIBRARIES            ########################
+##############################################################################
+##############################################################################
+
 
 library(MASS)
 
 
-########################################################
-##############          FUNCTIONS          #############
-########################################################
+##############################################################################
+##############################################################################
+#########################          FUNCTIONS          ########################
+##############################################################################
+##############################################################################
+
 
 
 # Load Aaron's little functions for plotting with colorspace
@@ -35,8 +42,8 @@ pal <- function(col, border = "light gray", ...)
 
 c.r.hcl<-function(x,n=1000, ...){ #cut rainbow_hcl
   xCut<-cut(x,breaks=n)
-	colors<-rainbow_hcl(n=n, ...)
-	out<-colors[xCut]
+  colors<-rainbow_hcl(n=n, ...)
+  out<-colors[xCut]
 	return(out)
 }
 c.s.hcl<-function(x,n=1000,only.up.to=n, ...){ #cut sequantial_hcl
@@ -110,17 +117,17 @@ fastSvdWide<-function(A,talk=FALSE){
 #A<-matrix(rnorm(3*4),ncol=4)
 
 
-getScores<-function(basis,data){
+getScores<-function(basis,data,talk=TRUE){
   #inputs: basis is pXk.b; data is nXp
   #outputs: scores are nXk.b
   n<-dim(data)[1]
   q<-dim(basis)[2]
   scores<-matrix(nrow=n,ncol=q) #rows are the score vectors for each person
-  print(paste("PROGRESS --  q =",q,'  N =',n))
-  pb<-txtProgressBar(min = 1, max = n,  char = "=", style = 3)
+  if(talk) print(paste("PROGRESS --  q =",q,'  N =',n))
+  if(talk) pb<-txtProgressBar(min = 1, max = n,  char = "=", style = 3)
   for(i in 1:n){
     scores[i,]<-lm(data[i,]~basis-1)$coef
-    setTxtProgressBar(pb,i)
+    if(talk)setTxtProgressBar(pb,i)
   }
   return(scores)
 }
@@ -131,16 +138,24 @@ getScores<-function(basis,data){
   return(x)
 }
 
-############################################
-############################################
-# Functions to simulate X & Y
+varExp<-function(d){ #where d is xsvd#d
+  return(cumsum(d^2)/sum(d^2))
+}
+
+##############################################################################
+##############################################################################
+###############           Functions to simulate X & Y          ###############
+##############################################################################
+##############################################################################
+
+
 
 #given n, p, #smooth x inputs, #smooth y inputs, form of β 
 
 
 #defining rwalk, a random walk generator.
 #to be used to add SMOOTH random noise to the covariate function, beyond our defined principle components
-rWalk<-function(p,amplitude=1){
+rWalk<-function(p,amplitude=1,norm=F){
   x<-rep(0,p)
   x[1]<-rnorm(1)
   for(i in 2:p){
@@ -149,9 +164,11 @@ rWalk<-function(p,amplitude=1){
   outpre1<-lowess(x,f=1/8)$y
   outpre2<-(outpre1-mean(outpre1))
   out<-outpre2*amplitude/max(abs(outpre2))
+  if(norm==T) out<-out/sum(out^2)
   return(out)
 }
-plot(rWalk(p=100,amplitude=.2)) #test
+#plot(rWalk(p=100,amplitude=.2)) #test
+#plot(rWalk(p=100,norm=TRUE)) #test
 
 genX<-function(n,p,noise.sd=1,k.x.s=10,k.x.r=0){ #k.x.r is # of rough x signals; k.x.s = #smooth signals
   #get signals
@@ -169,34 +186,178 @@ genX<-function(n,p,noise.sd=1,k.x.s=10,k.x.r=0){ #k.x.r is # of rough x signals;
   sigWeights<-matrix(runif(k.x*n,-1,1),nrow=n)
   noise<-matrix(rnorm(100,mean=0,sd=noise.sd),ncol=p,nrow=n)
   X<- sigWeights %*% t(signals) + noise
-  return(X)
+  return(list('x'=X,'signals'=signals))
 }
 
 
-n<-500
-p<-500
-noise.sd<-0
+
+set.seed(2011943)
+n<-80
+p<-1000
+nreps<-2000
+noise.sd<-.1
 k.x.s<-0
-k.x.r<-10
-sd.e<-1
+k.x.r<-100
+sd.e<-10
+k<-15 # that we fit
+#betat is set in the context of the loop
 
-x<-genX(n=n,p=p,noise.sd=noise.sd, k.x.s=k.x.s, k.x.r=k.x.r)
-x0<-scale(x,center=TRUE,scale=FALSE)
-system.time({
-  xsvd<-fastSvdWide(x0,talk=TRUE)
-})
-varExp<-cumsum(xsvd$d^2)/sum(xsvd$d^2)
-plot(varExp)
-k<-20
-pcs<-xsvd$v[,1:k]
-plot(pcs[,1])
 
-betat<-c(rep(1,20),rep(0,p-20)) #<-pcs[,1]
-#betat<-pcs[,1]
-beta0<-runif(1,0,3)
-intVec<-matrix(rep(1,n),nrow=n)
-e<-rnorm(n,sd=sd.e)
-y<-intVec*beta0+x%*%betat+e
+nSimReps<-100
+coveredJoint<-rep(NA,nSimReps)
+coveredPointwise<-rep(NA,nSimReps)
+coveredBonf.p<-rep(NA,nSimReps)
+coveredBonf.k<-rep(NA,nSimReps)
+weirdness1<-rep(NA,nSimReps)
+
+mydir<-'/Users/aaronfisher/Documents/JH/ADAMachine/Multiply Hypothesis Correction/'
+filename<-paste0(mydir,'plots/', 'n=',n,' p=',p,' kxs=',k.x.s,' kxr=',k.x.r,' k=',k,' nSim=', nSimReps,'.pdf')
+pdf(file=filename)
+plotInd<-ceiling(seq(1,nSimReps,length=15))
+colpal<-c.r.hcl(1:10,l=60)
+
+print(paste("number simulations =",nSimReps))
+pbSim<-txtProgressBar(min = 1, max = nSimReps,  char = "=", style = 3)
+for(sim.rep in 1:nSimReps){
+  genXsim<-genX(n=n,p=p,noise.sd=noise.sd, k.x.s=k.x.s, k.x.r=k.x.r)
+  x<-genXsim$x
+  x0<-scale(x,center=TRUE,scale=FALSE)
+  system.time({
+    xsvd<-fastSvdWide(x0,talk=FALSE)
+  })
+  varExp<-cumsum(xsvd$d^2)/sum(xsvd$d^2)
+  #plot(varExp)
+  pcs<-xsvd$v[,1:k]
+  
+  #beta0<-runif(1,0,3)
+  beta0<-0
+  intVec<-matrix(rep(1,n),nrow=n)
+  e<-rnorm(n,sd=sd.e)
+  
+  #betat<-rep(c(-.5,.5,-.5,.5),each=p/4)
+  betat<-rep(c(-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1),each=p/20)
+  #betat<-pcs[,1]
+  #betat<-genXsim$signals[,1]
+  #betat<-rep(0,p)
+  #betat<-rWalk(p=p)
+  #betat<-rnorm(p)
+
+  y<-intVec*beta0+x%*%betat+e
+  
+  if(k==1) pcs<-matrix(pcs,ncol=1)
+  
+  xi<-getScores(data=x,basis=pcs,talk=FALSE)
+  m<-lm(y~1+xi)
+  phi<-m$coef[-1]
+  beta<- c(pcs %*% phi)
+  Sigma.phi<-summary(m)$cov.unscaled[-1,-1] *summary(m)$sigma^2
+  
+  svd.Sigma.phi<-svd(Sigma.phi)
+  D<-svd.Sigma.phi$v
+  L<-svd.Sigma.phi$d
+  pcsD<-(pcs%*%D)
+  Q<-pcsD %*% diag(sqrt(L))
+    
+  S_d<-rep(NA,p)
+  for(i in 1:p){
+    varB.i<-t(pcs[i,]) %*% Sigma.phi %*% pcs[i,]   
+    S_d[i]<-sqrt(varB.i)
+  }
+
+  Q.scaled<- diag(1/S_d) %*% Q  
+  
+  #each col of Z will be a draw from a std normal length k dist
+  Z<-matrix(rnorm(k*nreps,mean=0,sd=1) ,ncol=nreps)
+  #make a function to get the scaled Bdraw from each Z, and the max_t [scaled B(t)] from that draw. Then apply it to all the reps
+  Zi2MaxBeta<-function(Zi){
+      Bdraw<-abs(Q.scaled %*% Zi)
+      return(max(Bdraw))
+  }
+  system.time({
+    maxBdraws<-apply(Z,2,Zi2MaxBeta)
+  })
+  #hist(maxBdraws)
+  qm<-quantile(maxBdraws,.95)
+  
+  pointwise95band<-S_d*qnorm(1-.05/2)
+  joint95band<-S_d*qm
+  bonf95band.p<-S_d*qnorm(1-.05/(2*p))
+  bonf95band.k<-S_d*qnorm(1-.05/(2*k))
+  
+  coveredJoint[sim.rep]<-all(betat< beta+joint95band & betat>beta-joint95band)
+  coveredPointwise[sim.rep]<-mean(betat< beta+pointwise95band & betat>beta-pointwise95band)
+  coveredBonf.p[sim.rep]<-all(betat< beta+bonf95band.p & betat>beta-bonf95band.p)
+  coveredBonf.k[sim.rep]<-all(betat< beta+bonf95band.k & betat>beta-bonf95band.k)
+  
+#  all(betat< beta+joint95band & betat>beta-joint95band)
+#  mean(betat< beta+pointwise95band & betat>beta-pointwise95band)
+#  all(betat< beta+bonf95band.p & betat>beta-bonf95band.p)
+#  all(betat< beta+bonf95band.k & betat>beta-bonf95band.k)
+# summary(m)$coef
+#  summary(m)
+
+  weirdness1[sim.rep]<- qm<qnorm(1-.05/(2*k))
+  
+  if(sim.rep %in% plotInd){
+    par(bg=rgb(.95,.95,.95))
+    cumCoverages<-c(mean(coveredJoint[1:sim.rep]), mean(coveredPointwise[1:sim.rep]), mean(coveredBonf.p[1:sim.rep]), mean(coveredBonf.k[1:sim.rep]))
+    labels4plot<-paste0(c('Joint=','Point=','BonfP=','BonfK='),round(cumCoverages,digits=4))
+
+    whichJoint<-betat< beta+joint95band & betat>beta-joint95band
+    plotlim<-c(min(beta-bonf95band.p),max(beta+bonf95band.p))
+    plot(betat,type='l',lwd=2,xlab='Beta Index',ylab='Band Value',ylim=plotlim, main=paste('iter =',sim.rep))
+    #lines(beta,col='lightgray')
+    lines(beta+joint95band,lwd=1,col=colpal[8])
+    lines(beta-joint95band,lwd=1,col=colpal[8])
+    points(which(!whichJoint),betat[!whichJoint],col='red')
+    legend('topright',legend=labels4plot)
+  }
+
+  setTxtProgressBar(pbSim,sim.rep)
+}
+dev.off()
+
+mean(coveredJoint)
+mean(coveredPointwise)
+mean(coveredBonf.p)
+mean(coveredBonf.k)
+
+mean(S_d)
+all(!weirdness1)
+
+
+
+
+
+plotlim<-c(min(beta-bonf95band.p),max(beta+bonf95band.p))
+
+#coverage plots for most recent one
+colpal<-c.r.hcl(1:10,l=60)
+#pal(colpal[1:5*2])
+par(bg=rgb(.95,.95,.95))
+plot(betat,type='l',lwd=1,xlab='Beta Index',ylab='Band Value',ylim=plotlim)
+lines(beta)
+
+plot(betat,type='l',lwd=1,xlab='Beta Index',ylab='Band Value',ylim=plotlim)
+lines(beta+pointwise95band,type='l',lwd=1)
+lines(beta-pointwise95band,type='l',lwd=1)
+lines(beta+joint95band,lwd=1,col=colpal[8])
+lines(beta-joint95band,lwd=1,col=colpal[8])
+lines(beta+bonf95band.p,lwd=1,col=colpal[10])
+lines(beta-bonf95band.p,lwd=1,col=colpal[10])
+lines(beta+bonf95band.k,lwd=1,col=colpal[4],lty=2)
+lines(beta-bonf95band.k,lwd=1,col=colpal[4],lty=2)
+
+  ####nreps=2000 looks about right
+  # qms<-rep(NA,nreps)
+  # qmsdiff<-rep(0,nreps)
+  # for(i in 1:nreps){
+  #   qms[i]<-quantile(maxBdraws[1:i],.95)
+  #   if(i>1)qmsdiff[i]<-qms[i]-qms[i-1]
+  # }
+  # plot(qms,type='l',ylim=c(qm*.95,qm*1.05))
+  # plot(qmsdiff,type='l')
+  
 
 
 #####################################################
@@ -207,9 +368,9 @@ y<-intVec*beta0+x%*%betat+e
 
 #load('/Users/aaronfisher/Documents/JH/ADAMachine/Multiply Hypothesis Correction/Test_Data_For_PCA_MultCorrection.RData')
 
-dim(x)
-dim(y)
-length(y)
+#dim(x)
+#dim(y)
+#length(y)
 
 #p<-dim(x)[2]
 #N<-dim(x)[1]
@@ -217,19 +378,18 @@ length(y)
 #PROBLEM? DO I SUBTRACT MEAN???
 #IS THIS THE PROBLEM I HAD BEFORE??? WHEN YOU SHOWED CIPRIAN THAT JUNK?
 
-if(k==1) pcs<-matrix(pcs,ncol=1)
-pcsTpcs<-t(pcs) %*% pcs
-pcspcsT<-pcs %*% t(pcs)
+#pcsTpcs<-t(pcs) %*% pcs
+#pcspcsT<-pcs %*% t(pcs)
 
-par(mfrow=c(1,2))
-dim(pcsTpcs)
-image(pcsTpcs)
-diag(pcsTpcs)
+#par(mfrow=c(1,2))
+#dim(pcsTpcs)
+#image(pcsTpcs)
+#diag(pcsTpcs)
 
 #dim(pcspcsT)
 #image(pcspcsT)
 #diag(pcspcsT)
-par(mfrow=c(1,1))
+#par(mfrow=c(1,1))
 
 ############################################################
 #" After regression:
@@ -263,9 +423,9 @@ phi<-m$coef[-1]
 beta<- c(pcs %*% phi)
 Sigma.phi<-summary(m)$cov.unscaled[-1,-1]
 
-plot(beta,type='l')
-lines(betat,col='blue')
-image(Sigma.phi)
+#plot(beta,type='l')
+#lines(betat,col='blue')
+#image(Sigma.phi)
 ############################
 
 #Write a function to finish it from here
@@ -279,13 +439,14 @@ Q<-pcs %*% D %*% diag(sqrt(L))
 #V<-pcs %*% Sigma.phi %*% t(pcs)
 #hist(V-Q%*%t(Q)) #nice!
 
-sds<-rep(NA,p)
+S_d<-rep(NA,p)
+pcsD<-(pcs%*%D)
 for(i in 1:p){
-  varB.i<-t(pcs[i,]) %*% Sigma.phi %*% pcs[i,]  
-  sds[i]<-sqrt(varB.i)
+  varB.i<- t(pcs[i,]) %*% Sigma.phi %*% pcs[j,] 
+  S_d[i]<-sqrt(varB.i)
 }
 
-Q.scaled<- diag(1/sds) %*% Q
+Q.scaled<- diag(1/S_d) %*% Q
 #corV<-cov2cor(V)
 #hist(corV-Q.scaled%*%t(Q.scaled)) #nice!
 
@@ -307,15 +468,15 @@ qnorm(1-.05/(2*p))
 qnorm(1-.05/(2*k))
 qm #almost equal to bonf @ level k, but MUCH CLOSER IF you omit the absolute value requirement in Zi2MaxBeta
 
-plotlim<-max(sds)*max(c(qm,qnorm(1-.05/(2*p))))
+plotlim<-max(S_d)*max(c(qm,qnorm(1-.05/(2*p))))
 
-pointwise95band<-sds*qnorm(1-.05/2)
-joint95band<-sds*qm
-#bonf95band<-sds*qnorm(.975/p) #almost equal to joing95band????
+pointwise95band<-S_d*qnorm(1-.05/2)
+joint95band<-S_d*qm
+#bonf95band<-S_d*qnorm(.975/p) #almost equal to joing95band????
 #????????
-bonf95band.p<-sds*qnorm(1-.05/(2*p))
+bonf95band.p<-S_d*qnorm(1-.05/(2*p))
 #our joint is exactly equal to the bonferroni with correction level k????
-bonf95band.k<-sds*qnorm(1-.05/(2*k))
+bonf95band.k<-S_d*qnorm(1-.05/(2*k))
 
 colpal<-c.r.hcl(1:10,l=60)
 pal(colpal[1:5*2])
@@ -357,7 +518,7 @@ if(!is.na(m)[1]){
 
 
 #WORKSPACE
-i<-22;j<-36
+i<-2;j<-3
 (V[i,j] == t(pcs[i,]) %*% Sigma.phi %*% pcs[j,]  )
 (V[i,j] - t((pcs%*%D)[i,]) %*% diag(L) %*% (pcs%*%D)[j,] ) 
 #so the formula for V[i,j] is 
@@ -398,8 +559,6 @@ getBetaSigma<-function(Sigma.phi,basis,diag.only=TRUE){
 #image(V,col=c.d.hcl(-10:10))
 vc<-cov2cor(V)
 #image(vc,col=c.d.hcl(-10:10))
-
-
 
 
 
